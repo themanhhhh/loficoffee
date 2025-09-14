@@ -1,95 +1,107 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client'
+import React, { useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import styles from "./page.module.css"
+import { MdEmail, MdLock, MdVisibility, MdVisibilityOff, MdLogin } from 'react-icons/md'
+import { logo } from './image'
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Xử lý đăng nhập ở đây
+    console.log('Login attempt:', { email, password, rememberMe })
+    // Redirect to staff page after login
+    window.location.href = '/staff'
+  }
+
+
+  return (
+    <div className={styles.loginPage}>
+      {/* Logo Section */}
+      <div className={styles.logoSection}>
+        <div className={styles.logoIcon}>
+          <Image 
+            src={logo} 
+            alt="LOFI Coffee Logo" 
+            width={160} 
+            height={160}
+            className={styles.logoImage}
+          />
         </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <h1 className={styles.logoTitle}>LOFI Coffee</h1>
+        <p className={styles.logoSubtitle}>Đăng nhập vào hệ thống</p>
+      </div>
+      
+      <div className={styles.loginContainer}>
+        {/* Login Form */}
+        <form className={styles.loginForm} onSubmit={handleLogin}>
+          <div className={styles.inputGroup}>
+            <label htmlFor="email">Email đăng nhập</label>
+            <div className={styles.inputWrapper}>
+              <MdEmail className={styles.inputIcon} />
+              <input
+                type="email"
+                id="email"
+                placeholder="Nhập email của bạn"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <div className={styles.inputGroup}>
+            <label htmlFor="password">Mật khẩu</label>
+            <div className={styles.inputWrapper}>
+              <MdLock className={styles.inputIcon} />
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                placeholder="Nhập mật khẩu"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className={styles.passwordToggle}
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.formOptions}>
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              <span className={styles.checkmark}></span>
+              Ghi nhớ đăng nhập
+            </label>
+            <Link href="/forgot-password" className={styles.forgotPassword}>
+              Quên mật khẩu?
+            </Link>
+          </div>
+
+          <button type="submit" className={styles.loginButton}>
+            <MdLogin /> Đăng nhập
+          </button>
+
+          
+        </form>
+
+      
+      </div>
     </div>
-  );
+  )
 }
