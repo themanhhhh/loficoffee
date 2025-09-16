@@ -1,9 +1,12 @@
 'use client'
 import React, { useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import Style from '../style/admin.module.css'
-import { FaPlus, FaEdit, FaTrash, FaUser, FaArrowLeft, FaSearch, FaChartBar, FaUtensils, FaList } from 'react-icons/fa'
-import { logo, coffeeBlack } from '../image/index'
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaChartBar, FaUtensils, FaList, FaBox, FaUsers, FaTicketAlt } from 'react-icons/fa'
+import { coffeeBlack } from '../image/index'
+import AdminHeader from '../components/adminheader/adminheader'
 
 interface Product {
   id: number
@@ -15,7 +18,7 @@ interface Product {
 }
 
 const Admin = () => {
-  const [activeTab, setActiveTab] = useState('menu')
+  const pathname = usePathname()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -135,9 +138,12 @@ const Admin = () => {
   ]
 
   const sidebarItems = [
-    { id: 'stats', name: 'Thống kê', icon: FaChartBar },
-    { id: 'menu', name: 'Quản lý Menu', icon: FaUtensils },
-    { id: 'categories', name: 'Danh mục', icon: FaList }
+    { id: 'stats', name: 'Thống kê', icon: FaChartBar, path: '/admin/statistic' },
+    { id: 'menu', name: 'Quản lý Menu', icon: FaUtensils, path: '/admin' },
+    { id: 'categories', name: 'Danh mục', icon: FaList, path: '/admin/category' },
+    { id: 'materials', name: 'Nguyên liệu', icon: FaBox, path: '/admin/material' },
+    { id: 'staff', name: 'Nhân viên', icon: FaUsers, path: '/admin/staff' },
+    { id: 'vouchers', name: 'Voucher', icon: FaTicketAlt, path: '/admin/voucher' }
   ]
 
   // Filter items based on search and category
@@ -212,203 +218,158 @@ const Admin = () => {
   return (
     <div className={Style.adminContainer}>
       {/* Header */}
-      <header className={Style.header}>
-        <div className={Style.headerLeft}>
-          <div className={Style.logo}>
-            <div className={Style.logoIconContainer}>
-              <Image 
-                src={logo}
-                alt="Cafe POS Logo" 
-                width={32} 
-                height={32}
-                className={Style.logoImage}
-              />
-            </div>
-            <div className={Style.logoText}>
-              <h1>Admin Panel</h1>
-              <p>Quản lý hệ thống POS</p>
-            </div>
-          </div>
-        </div>
-        <div className={Style.headerRight}>
-          <button className={Style.backBtn}>
-            <FaArrowLeft /> Về POS
-          </button>
-          <div className={Style.userInfo}>
-            <span>Quản trị viên</span>
-            <span className={Style.userName}>Admin User</span>
-          </div>
-          <FaUser className={Style.userIcon} />
-        </div>
-      </header>
+      <AdminHeader />
 
       <div className={Style.mainLayout}>
         {/* Sidebar */}
         <div className={Style.sidebar}>
           {sidebarItems.map(item => {
             const IconComponent = item.icon
+            const isActive = pathname === item.path
             return (
-              <button
+              <Link
                 key={item.id}
-                className={`${Style.sidebarItem} ${activeTab === item.id ? Style.active : ''}`}
-                onClick={() => setActiveTab(item.id)}
+                href={item.path}
+                className={`${Style.sidebarItem} ${isActive ? Style.active : ''}`}
               >
                 <IconComponent className={Style.sidebarIcon} />
                 {item.name}
-              </button>
+              </Link>
             )
           })}
         </div>
 
         {/* Main Content */}
         <div className={Style.content}>
-          {activeTab === 'menu' && (
-            <>
-              {/* Menu Management Header */}
-              <div className={Style.contentHeader}>
-                <div className={Style.pageTitle}>
-                  <h2>Quản lý Menu</h2>
-                  <p>Tổng số món: {filteredItems.length} | Hiển thị: {startIndex + 1}-{Math.min(endIndex, filteredItems.length)}</p>
-                </div>
-                <button className={Style.addBtn} onClick={handleAddItem}>
-                  <FaPlus /> Thêm món mới
+          {/* Menu Management Header */}
+          <div className={Style.contentHeader}>
+            <div className={Style.pageTitle}>
+              <h2>Quản lý Menu</h2>
+              <p>Tổng số món: {filteredItems.length} | Hiển thị: {startIndex + 1}-{Math.min(endIndex, filteredItems.length)}</p>
+            </div>
+            <button className={Style.addBtn} onClick={handleAddItem}>
+              <FaPlus /> Thêm món mới
+            </button>
+          </div>
+
+          {/* Search and Filter */}
+          <div className={Style.filterSection}>
+            <div className={Style.searchBox}>
+              <FaSearch className={Style.searchIcon} />
+              <input
+                type="text"
+                placeholder="Tìm kiếm món ăn..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className={Style.searchInput}
+              />
+            </div>
+            <select 
+              value={filterCategory} 
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className={Style.filterSelect}
+            >
+              <option value="all">Tất cả danh mục</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Menu Table */}
+          <div className={Style.tableContainer}>
+            <table className={Style.menuTable}>
+              <thead>
+                <tr>
+                  <th>Món</th>
+                  <th>Danh mục</th>
+                  <th>Giá</th>
+                  <th>Mô tả</th>
+                  <th>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentItems.map(item => (
+                  <tr key={item.id}>
+                    <td>
+                      <div className={Style.menuItemCell}>
+                        <Image 
+                          src={coffeeBlack}
+                          alt={item.name}
+                          width={60}
+                          height={60}
+                          className={Style.menuTableImg}
+                        />
+                        <div className={Style.menuItemInfo}>
+                          <h4>{item.name}</h4>
+                          <span className={Style.itemId}>ID: {item.id}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={Style.categoryTag}>
+                        {categories.find(cat => cat.id === item.category)?.name}
+                      </span>
+                    </td>
+                    <td className={Style.priceCell}>{formatPrice(item.price)}</td>
+                    <td className={Style.descCell}>{item.description}</td>
+                    <td>
+                      <div className={Style.actionButtons}>
+                        <button 
+                          className={Style.editBtn}
+                          onClick={() => handleEditItem(item)}
+                          title="Chỉnh sửa"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button 
+                          className={Style.deleteBtn}
+                          onClick={() => handleDeleteItem(item)}
+                          title="Xóa"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className={Style.paginationContainer}>
+              <div className={Style.paginationInfo}>
+                Trang {currentPage} / {totalPages}
+              </div>
+              <div className={Style.pagination}>
+                <button 
+                  className={`${Style.pageBtn} ${currentPage === 1 ? Style.disabled : ''}`}
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                >
+                  ‹
+                </button>
+                
+                {getPageNumbers().map(page => (
+                  <button
+                    key={page}
+                    className={`${Style.pageBtn} ${currentPage === page ? Style.active : ''}`}
+                    onClick={() => handlePageChange(page)}
+                  >
+                    {page}
+                  </button>
+                ))}
+                
+                <button 
+                  className={`${Style.pageBtn} ${currentPage === totalPages ? Style.disabled : ''}`}
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                >
+                  ›
                 </button>
               </div>
-
-              {/* Search and Filter */}
-              <div className={Style.filterSection}>
-                <div className={Style.searchBox}>
-                  <FaSearch className={Style.searchIcon} />
-                  <input
-                    type="text"
-                    placeholder="Tìm kiếm món ăn..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className={Style.searchInput}
-                  />
-                </div>
-                <select 
-                  value={filterCategory} 
-                  onChange={(e) => setFilterCategory(e.target.value)}
-                  className={Style.filterSelect}
-                >
-                  <option value="all">Tất cả danh mục</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Menu Table */}
-              <div className={Style.tableContainer}>
-                <table className={Style.menuTable}>
-                  <thead>
-                    <tr>
-                      <th>Món</th>
-                      <th>Danh mục</th>
-                      <th>Giá</th>
-                      <th>Mô tả</th>
-                      <th>Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {currentItems.map(item => (
-                      <tr key={item.id}>
-                        <td>
-                          <div className={Style.menuItemCell}>
-                            <Image 
-                              src={coffeeBlack}
-                              alt={item.name}
-                              width={60}
-                              height={60}
-                              className={Style.menuTableImg}
-                            />
-                            <div className={Style.menuItemInfo}>
-                              <h4>{item.name}</h4>
-                              <span className={Style.itemId}>ID: {item.id}</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <span className={Style.categoryTag}>
-                            {categories.find(cat => cat.id === item.category)?.name}
-                          </span>
-                        </td>
-                        <td className={Style.priceCell}>{formatPrice(item.price)}</td>
-                        <td className={Style.descCell}>{item.description}</td>
-                        <td>
-                          <div className={Style.actionButtons}>
-                            <button 
-                              className={Style.editBtn}
-                              onClick={() => handleEditItem(item)}
-                              title="Chỉnh sửa"
-                            >
-                              <FaEdit />
-                            </button>
-                            <button 
-                              className={Style.deleteBtn}
-                              onClick={() => handleDeleteItem(item)}
-                              title="Xóa"
-                            >
-                              <FaTrash />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className={Style.paginationContainer}>
-                  <div className={Style.paginationInfo}>
-                    Trang {currentPage} / {totalPages}
-                  </div>
-                  <div className={Style.pagination}>
-                    <button 
-                      className={`${Style.pageBtn} ${currentPage === 1 ? Style.disabled : ''}`}
-                      onClick={handlePrevPage}
-                      disabled={currentPage === 1}
-                    >
-                      ‹
-                    </button>
-                    
-                    {getPageNumbers().map(page => (
-                      <button
-                        key={page}
-                        className={`${Style.pageBtn} ${currentPage === page ? Style.active : ''}`}
-                        onClick={() => handlePageChange(page)}
-                      >
-                        {page}
-                      </button>
-                    ))}
-                    
-                    <button 
-                      className={`${Style.pageBtn} ${currentPage === totalPages ? Style.disabled : ''}`}
-                      onClick={handleNextPage}
-                      disabled={currentPage === totalPages}
-                    >
-                      ›
-                    </button>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-          
-          {activeTab === 'stats' && (
-            <div className={Style.contentHeader}>
-              <h2>Thống kê</h2>
-              <p>Chức năng đang phát triển...</p>
-            </div>
-          )}
-          
-          {activeTab === 'categories' && (
-            <div className={Style.contentHeader}>
-              <h2>Danh mục</h2>
-              <p>Chức năng đang phát triển...</p>
             </div>
           )}
         </div>

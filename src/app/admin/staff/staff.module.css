@@ -1,0 +1,17 @@
+.staffContainer {
+    padding: 2rem;
+    background-color: #f8f4e8;
+    min-height: calc(100vh - 80px);
+}
+
+.staffContainer h1 {
+    color: #8B4513;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.staffContainer p {
+    color: #666;
+    font-size: 1.1rem;
+}

@@ -1,0 +1,17 @@
+.voucherContainer {
+    padding: 2rem;
+    background-color: #f8f4e8;
+    min-height: calc(100vh - 80px);
+}
+
+.voucherContainer h1 {
+    color: #8B4513;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.voucherContainer p {
+    color: #666;
+    font-size: 1.1rem;
+}
