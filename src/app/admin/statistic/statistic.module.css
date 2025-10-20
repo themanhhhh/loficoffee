@@ -1,17 +1,310 @@
-.statisticContainer {
-    padding: 2rem;
-    background-color: #f8f4e8;
-    min-height: calc(100vh - 80px);
+.container {
+  background: #f4f1ea;
+  min-height: calc(100vh - 80px);
+  padding: 2rem 3rem 3rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-.statisticContainer h1 {
-    color: #8B4513;
-    margin-bottom: 1rem;
-    font-size: 2rem;
-    font-weight: 600;
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.25rem;
 }
 
-.statisticContainer p {
-    color: #666;
-    font-size: 1.1rem;
+.summaryCard {
+  background: white;
+  border-radius: 18px;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  box-shadow: 0 14px 32px rgba(139, 69, 19, 0.12);
+  color: #3f2c1f;
+}
+
+.summaryIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.summaryContent span {
+  display: block;
+  color: #7d6d5b;
+  font-size: 0.95rem;
+}
+
+.summaryContent strong {
+  display: block;
+  font-size: 1.6rem;
+  margin-top: 0.3rem;
+}
+
+.summaryChange {
+  margin-top: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  color: #7d6d5b;
+}
+
+.summaryChange small {
+  color: #978675;
+}
+
+.positive {
+  color: #28a745;
+}
+
+.negative {
+  color: #dc3545;
+}
+
+.gridTwo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 16px 36px rgba(139, 69, 19, 0.1);
+  padding: 1.75rem;
+  display: grid;
+  gap: 1.2rem;
+  color: #3f2c1f;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.cardHeader h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.cardHeader span {
+  color: #7d6d5b;
+  font-size: 0.9rem;
+}
+
+.channelList {
+  display: grid;
+  gap: 1rem;
+}
+
+.channelRow {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr 1fr;
+  gap: 1rem;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.channelLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #4a3b2b;
+}
+
+.channelProgress {
+  height: 12px;
+  background: #efe4d6;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.channelProgress div {
+  height: 100%;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+}
+
+.channelValue {
+  text-align: right;
+  font-weight: 600;
+}
+
+.productList {
+  display: grid;
+  gap: 1rem;
+}
+
+.productRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px dashed #eadfce;
+}
+
+.productRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.productRow strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.productRow span {
+  color: #7d6d5b;
+  font-size: 0.85rem;
+}
+
+.productRevenue {
+  font-weight: 600;
+  color: #3f2c1f;
+}
+
+.barChart {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+  height: 220px;
+  gap: 1.5rem;
+}
+
+.barColumn {
+  display: grid;
+  gap: 0.75rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #4a3b2b;
+}
+
+.barWrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.bar {
+  width: 32px;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.bar small {
+  position: absolute;
+  bottom: 6px;
+  font-size: 0.7rem;
+  color: white;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+.barRevenue {
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+}
+
+.barCost {
+  background: linear-gradient(135deg, #dc3545 0%, #ff7676 100%);
+}
+
+.barProfit {
+  background: linear-gradient(135deg, #28a745 0%, #60d394 100%);
+}
+
+.ingredientList {
+  display: grid;
+  gap: 1rem;
+}
+
+.ingredientRow {
+  display: grid;
+  grid-template-columns: 1.6fr 2fr 0.4fr;
+  gap: 1rem;
+  align-items: center;
+}
+
+.ingredientInfo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ingredientInfo strong {
+  display: block;
+  font-size: 1rem;
+}
+
+.ingredientInfo span {
+  color: #7d6d5b;
+  font-size: 0.85rem;
+}
+
+.ingredientProgress {
+  height: 10px;
+  background: #efe4d6;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.ingredientProgress div {
+  height: 100%;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+}
+
+.ingredientPercent {
+  font-weight: 600;
+  color: #3f2c1f;
+  text-align: right;
+}
+
+@media (max-width: 1200px) {
+  .summaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .gridTwo {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1.25rem;
+  }
+
+  .barChart {
+    gap: 1rem;
+  }
+
+  .barWrapper {
+    gap: 0.35rem;
+  }
 }

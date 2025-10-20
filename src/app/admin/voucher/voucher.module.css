@@ -1,17 +1,736 @@
-.voucherContainer {
-    padding: 2rem;
-    background-color: #f8f4e8;
-    min-height: calc(100vh - 80px);
+.container {
+  background: #f4f1ea;
+  min-height: calc(100vh - 80px);
+  padding: 2rem 3rem 3rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-.voucherContainer h1 {
-    color: #8B4513;
-    margin-bottom: 1rem;
-    font-size: 2rem;
-    font-weight: 600;
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
 }
 
-.voucherContainer p {
-    color: #666;
-    font-size: 1.1rem;
+.headerMain h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #3f2c1f;
+}
+
+.headerMain p {
+  margin: 0.5rem 0 0 0;
+  color: #7d6d5b;
+  font-size: 1rem;
+}
+
+.createButton {
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  color: white;
+  border: none;
+  padding: 0.85rem 1.4rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  box-shadow: 0 16px 32px rgba(139, 69, 19, 0.22);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.createButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 36px rgba(139, 69, 19, 0.28);
+}
+
+/* Stats Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.statCard {
+  background: white;
+  border-radius: 18px;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  box-shadow: 0 14px 32px rgba(139, 69, 19, 0.12);
+  color: #3f2c1f;
+}
+
+.statIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.iconActive {
+  background: linear-gradient(135deg, #28a745 0%, #60d394 100%);
+}
+
+.iconInactive {
+  background: linear-gradient(135deg, #ff9f1c 0%, #ffbf69 100%);
+}
+
+.iconExpired {
+  background: linear-gradient(135deg, #dc3545 0%, #ff7676 100%);
+}
+
+.statContent span {
+  display: block;
+  font-size: 0.95rem;
+  color: #7d6d5b;
+}
+
+.statContent strong {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-top: 0.3rem;
+}
+
+/* Filters */
+.filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.searchBox {
+  flex: 1;
+  min-width: 260px;
+  background: white;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 12px 24px rgba(139, 69, 19, 0.1);
+  color: #7d6d5b;
+}
+
+.searchBox input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 0.95rem;
+  color: #3f2c1f;
+}
+
+.filterGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.filterGroup select {
+  border: 1px solid #decebd;
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  background: white;
+  font-size: 0.95rem;
+  color: #3f2c1f;
+  min-width: 170px;
+  box-shadow: 0 8px 16px rgba(139, 69, 19, 0.06);
+}
+
+/* Main Content */
+.mainContent {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Voucher List */
+.voucherList {
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(139, 69, 19, 0.12);
+  overflow: hidden;
+}
+
+.listHeader {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid #efe4d6;
+}
+
+.listHeader h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #3f2c1f;
+}
+
+.voucherGrid {
+  padding: 1rem;
+  display: grid;
+  gap: 1rem;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.voucherCard {
+  background: #fdf7ee;
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid #eadfce;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.voucherCard:hover {
+  background: #faf2e8;
+  border-color: #d4c4b0;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(139, 69, 19, 0.1);
+}
+
+.voucherCard.selected {
+  background: rgba(139, 69, 19, 0.08);
+  border-color: #8B4513;
+}
+
+.voucherHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.voucherCode {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.code {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #8B4513;
+  background: rgba(139, 69, 19, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.copyBtn {
+  background: none;
+  border: none;
+  color: #7d6d5b;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.copyBtn:hover {
+  background: rgba(139, 69, 19, 0.1);
+  color: #8B4513;
+}
+
+.statusTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.statusActive {
+  background: rgba(40, 167, 69, 0.15);
+  color: #1f7a44;
+}
+
+.statusInactive {
+  background: rgba(255, 193, 7, 0.18);
+  color: #c88f00;
+}
+
+.statusExpired {
+  background: rgba(220, 53, 69, 0.15);
+  color: #dc3545;
+}
+
+.voucherBody h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  color: #3f2c1f;
+}
+
+.voucherBody p {
+  margin: 0 0 1rem 0;
+  color: #7d6d5b;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.voucherDetails {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.detailRow span:first-child {
+  color: #7d6d5b;
+}
+
+.detailValue {
+  color: #3f2c1f;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.voucherActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  justify-content: flex-end;
+}
+
+.actionBtn {
+  background: none;
+  border: 1px solid #decebd;
+  color: #7d6d5b;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionBtn:hover {
+  background: #f5f0e8;
+  border-color: #8B4513;
+  color: #8B4513;
+}
+
+/* Voucher Details Panel */
+.voucherDetails {
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 18px 40px rgba(139, 69, 19, 0.12);
+  overflow: hidden;
+}
+
+.detailsPanel {
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  color: #3f2c1f;
+}
+
+.detailsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.detailsHeader h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #3f2c1f;
+}
+
+.detailsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.detailSection h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #3f2c1f;
+  border-bottom: 1px solid #efe4d6;
+  padding-bottom: 0.5rem;
+}
+
+.detailGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.detailItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.detailItem span:first-child {
+  color: #7d6d5b;
+  font-weight: 500;
+}
+
+.codeValue {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  color: #8B4513;
+  background: rgba(139, 69, 19, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.valueHighlight {
+  font-weight: 700;
+  color: #8B4513;
+}
+
+.usageStats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.usageBar {
+  height: 12px;
+  background: #efe4d6;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.usageFill {
+  height: 100%;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.usageText {
+  font-size: 0.9rem;
+  color: #7d6d5b;
+  text-align: center;
+}
+
+.detailsActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.primaryBtn {
+  flex: 1;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  color: white;
+  border: none;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(139, 69, 19, 0.22);
+}
+
+.secondaryBtn {
+  flex: 1;
+  background: white;
+  color: #8B4513;
+  border: 1px solid #8B4513;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.secondaryBtn:hover {
+  background: #8B4513;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.emptyState {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #7d6d5b;
+}
+
+.emptyState svg {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.emptyState h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.2rem;
+}
+
+.emptyState p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mainContent {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterGroup {
+    justify-content: space-between;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .voucherGrid {
+    max-height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 1.25rem;
+  }
+
+  .filterGroup {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .filterGroup select {
+    width: 100%;
+  }
+
+  .detailsActions {
+    flex-direction: column;
+  }
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.closeBtn:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.modalForm {
+  padding: 1.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1.25rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: #8B4513;
+}
+
+.formGroup input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.formGroup small {
+  display: block;
+  margin-top: 0.25rem;
+  color: #666;
+  font-size: 0.85rem;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.modalActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.cancelBtn,
+.submitBtn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  font-size: 1rem;
+}
+
+.cancelBtn {
+  background-color: #f0f0f0;
+  color: #666;
+}
+
+.cancelBtn:hover {
+  background-color: #e0e0e0;
+}
+
+.submitBtn {
+  background-color: #8B4513;
+  color: white;
+}
+
+.submitBtn:hover {
+  background-color: #6d3410;
+}
+
+@media (max-width: 640px) {
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+  
+  .modalContent {
+    max-width: 100%;
+    margin: 1rem;
+  }
+  
+  .modalActions {
+    flex-direction: column;
+  }
+  
+  .cancelBtn,
+  .submitBtn {
+    width: 100%;
+  }
 }

@@ -1,23 +1,59 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import styles from "./page.module.css"
-import { MdEmail, MdLock, MdVisibility, MdVisibilityOff, MdLogin } from 'react-icons/md'
+import { MdEmail, MdLock, MdVisibility, MdVisibilityOff, MdLogin, MdError } from 'react-icons/md'
 import { logo } from './image'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function Home() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  
+  const { login, isAuthenticated, isLoading, error } = useAuth()
+  const router = useRouter()
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      router.push('/staff')
+    }
+  }, [isAuthenticated, isLoading, router])
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Xử lý đăng nhập ở đây
-    console.log('Login attempt:', { email, password, rememberMe })
-    // Redirect to staff page after login
-    window.location.href = '/staff'
+    
+    if (!username || !password) {
+      return
+    }
+
+    try {
+      setIsSubmitting(true)
+      await login(username, password)
+      // Redirect will happen automatically via useEffect
+    } catch (error) {
+      // Error is handled by AuthContext
+      console.error('Login failed:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <div className={styles.loginPage}>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingSpinner}></div>
+          <p>Đang kiểm tra đăng nhập...</p>
+        </div>
+      </div>
+    )
   }
 
 
@@ -39,18 +75,26 @@ export default function Home() {
       </div>
       
       <div className={styles.loginContainer}>
+        {/* Error Message */}
+        {error && (
+          <div className={styles.errorMessage}>
+            <MdError className={styles.errorIcon} />
+            <span>{error}</span>
+          </div>
+        )}
+
         {/* Login Form */}
         <form className={styles.loginForm} onSubmit={handleLogin}>
           <div className={styles.inputGroup}>
-            <label htmlFor="email">Email đăng nhập</label>
+            <label htmlFor="username">Tài khoản đăng nhập</label>
             <div className={styles.inputWrapper}>
               <MdEmail className={styles.inputIcon} />
               <input
-                type="email"
-                id="email"
-                placeholder="Nhập email của bạn"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                id="username"
+                placeholder="Nhập tài khoản đăng nhập"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
@@ -93,8 +137,21 @@ export default function Home() {
             </Link>
           </div>
 
-          <button type="submit" className={styles.loginButton}>
-            <MdLogin /> Đăng nhập
+          <button 
+            type="submit" 
+            className={styles.loginButton}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <div className={styles.spinner}></div>
+                Đang đăng nhập...
+              </>
+            ) : (
+              <>
+                <MdLogin /> Đăng nhập
+              </>
+            )}
           </button>
 
           

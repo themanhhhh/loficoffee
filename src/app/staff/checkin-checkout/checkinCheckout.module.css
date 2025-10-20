@@ -1,0 +1,379 @@
+.page {
+  min-height: 100vh;
+  background: #f4f1ea;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding-bottom: 3rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 3rem 1.5rem;
+  background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+  color: white;
+}
+
+.headerMain {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 0.95rem;
+  border-bottom: 1px solid transparent;
+  width: fit-content;
+  transition: all 0.2s ease;
+}
+
+.backLink:hover {
+  color: white;
+  border-bottom-color: rgba(255, 255, 255, 0.6);
+}
+
+.headerMain h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.headerMain p {
+  margin: 0;
+  opacity: 0.85;
+}
+
+.headerBadge {
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+  padding: 2rem 3rem 0;
+}
+
+.sidebar {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 14px 36px rgba(139, 69, 19, 0.08);
+  padding: 1.5rem;
+  color: #3f2c1f;
+}
+
+.sidebar h2 {
+  margin: 0 0 1.25rem 0;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.staffItem {
+  border: 1px solid #e7dccd;
+  border-radius: 16px;
+  padding: 1rem;
+  display: grid;
+  gap: 0.6rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  background: #fffbf5;
+}
+
+.staffItem:hover {
+  border-color: #8B4513;
+  box-shadow: 0 10px 24px rgba(139, 69, 19, 0.14);
+  transform: translateY(-3px);
+}
+
+.staffItemActive {
+  border-color: #8B4513;
+  box-shadow: 0 12px 28px rgba(139, 69, 19, 0.2);
+  background: white;
+}
+
+.staffInfo strong {
+  font-size: 1rem;
+}
+
+.staffInfo span {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #6c5a49;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  width: fit-content;
+}
+
+.statusPending {
+  background: rgba(255, 193, 7, 0.15);
+  color: #c88f00;
+}
+
+.statusWorking {
+  background: rgba(40, 167, 69, 0.15);
+  color: #1f7a44;
+}
+
+.statusCompleted {
+  background: rgba(108, 117, 125, 0.15);
+  color: #495057;
+}
+
+.timeInfo {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: #7d6d5b;
+}
+
+.timeInfo span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.content {
+  background: white;
+  border-radius: 20px;
+  padding: 1.75rem;
+  box-shadow: 0 16px 40px rgba(139, 69, 19, 0.08);
+  min-height: 540px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.contentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.contentHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #3f2c1f;
+}
+
+.contentHeader span {
+  color: #7d6d5b;
+}
+
+.currentState {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  background: #fdf8f1;
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid #eadfce;
+  color: #3f2c1f;
+}
+
+.currentState span {
+  display: block;
+  font-size: 0.85rem;
+  color: #7d6d5b;
+}
+
+.currentState strong {
+  font-size: 1.2rem;
+  margin-top: 0.35rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.actions button {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.actions button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(63, 44, 31, 0.12);
+}
+
+.checkInBtn {
+  background: linear-gradient(135deg, #28a745 0%, #60d394 100%);
+  color: white;
+}
+
+.checkOutBtn {
+  background: linear-gradient(135deg, #dc3545 0%, #ff7676 100%);
+  color: white;
+}
+
+.timeline {
+  background: #fffbf5;
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid #eadfce;
+}
+
+.timeline h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #3f2c1f;
+}
+
+.timeline ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.timeline li {
+  display: flex;
+  gap: 1rem;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.timelinePoint {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #8B4513;
+  margin-top: 0.35rem;
+  flex-shrink: 0;
+}
+
+.timelineContent {
+  display: grid;
+  gap: 0.2rem;
+  color: #4a3b2b;
+}
+
+.timelineTime {
+  font-size: 0.85rem;
+  color: #7d6d5b;
+}
+
+.emptyTimeline {
+  margin: 0;
+  color: #7d6d5b;
+}
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  color: #7d6d5b;
+  font-size: 1.1rem;
+}
+
+.emptyState svg {
+  font-size: 3rem;
+  opacity: 0.5;
+}
+
+@media (max-width: 1200px) {
+  .layout {
+    grid-template-columns: 280px 1fr;
+  }
+
+  .currentState {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    order: 2;
+  }
+
+  .content {
+    order: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  .headerBadge {
+    display: none;
+  }
+
+  .layout {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .layout {
+    padding: 1rem;
+  }
+
+  .sidebar,
+  .content {
+    padding: 1.25rem;
+  }
+}

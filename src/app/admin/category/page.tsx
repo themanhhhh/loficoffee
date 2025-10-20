@@ -1,124 +1,265 @@
 'use client'
-import React, { useState } from 'react'
-import Style from './category.module.css'
-import { FaPlus, FaEdit, FaTrash, FaCoffee, FaLeaf, FaBlender, FaCookie, FaUtensils } from 'react-icons/fa'
-import AdminHeader from '../../components/adminheader/adminheader'
+
+import React, { useEffect, useState } from 'react'
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaSearch,
+  FaTimes,
+  FaList
+} from 'react-icons/fa'
+import AdminLayout from '../../components/adminlayout/adminlayout'
+import styles from './category.module.css'
+import { apiFetch, ApiError } from '../../../lib/api'
 
 interface Category {
-  id: string
-  name: string
-  itemCount: number
-  icon: React.ComponentType
-  color: string
+  maLoaiMon: string
+  tenLoaiMon: string
 }
 
-const Category = () => {
-  const [categories] = useState<Category[]>([
-    {
-      id: 'coffee',
-      name: 'Cà phê',
-      itemCount: 4,
-      icon: FaCoffee,
-      color: '#D4A574'
-    },
-    {
-      id: 'tea',
-      name: 'Trà',
-      itemCount: 2,
-      icon: FaLeaf,
-      color: '#E6C068'
-    },
-    {
-      id: 'smoothie',
-      name: 'Sinh tố',
-      itemCount: 2,
-      icon: FaBlender,
-      color: '#C8B566'
-    },
-    {
-      id: 'dessert',
-      name: 'Bánh ngọt',
-      itemCount: 2,
-      icon: FaCookie,
-      color: '#D4A574'
-    },
-    {
-      id: 'snack',
-      name: 'Đồ ăn nhẹ',
-      itemCount: 2,
-      icon: FaUtensils,
-      color: '#C8B566'
+interface CategoryFormData {
+  maLoaiMon: string
+  tenLoaiMon: string
+}
+
+const CategoryPage = () => {
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [showModal, setShowModal] = useState(false)
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [formData, setFormData] = useState<CategoryFormData>({
+    maLoaiMon: '',
+    tenLoaiMon: ''
+  })
+
+  useEffect(() => {
+    loadCategories()
+  }, [])
+
+  const loadCategories = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await apiFetch<Category[]>('/api/loaimon')
+      setCategories(data)
+    } catch (err) {
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : 'Không thể tải danh sách danh mục. Vui lòng thử lại.'
+      )
+    } finally {
+      setLoading(false)
     }
-  ])
+  }
 
   const handleAddCategory = () => {
-    alert('Chức năng thêm danh mục mới')
+    setEditingCategory(null)
+    setFormData({
+      maLoaiMon: '',
+      tenLoaiMon: ''
+    })
+    setShowModal(true)
   }
 
   const handleEditCategory = (category: Category) => {
-    alert(`Chỉnh sửa danh mục: ${category.name}`)
+    setEditingCategory(category)
+    setFormData({
+      maLoaiMon: category.maLoaiMon,
+      tenLoaiMon: category.tenLoaiMon
+    })
+    setShowModal(true)
   }
 
-  const handleDeleteCategory = (category: Category) => {
-    if (confirm(`Bạn có chắc muốn xóa danh mục "${category.name}"?`)) {
-      alert(`Đã xóa danh mục: ${category.name}`)
+  const handleDeleteCategory = async (category: Category) => {
+    if (!confirm(`Bạn có chắc muốn xóa danh mục "${category.tenLoaiMon}"?`)) {
+      return
+    }
+
+    try {
+      await apiFetch(`/api/loaimon/${category.maLoaiMon}`, {
+        method: 'DELETE'
+      })
+      
+      await loadCategories()
+      alert('Xóa danh mục thành công!')
+    } catch (err) {
+      alert('Lỗi khi xóa danh mục: ' + (err instanceof ApiError ? err.message : 'Unknown error'))
     }
   }
 
-  return (
-    <div className={Style.categoryContainer}>
-      <AdminHeader />
-      <div className={Style.categoryContainer}>
-        {/* Header */}
-        <div className={Style.categoryHeader}>
-        <div className={Style.headerInfo}>
-          <h1 className={Style.pageTitle}>Quản lý Danh mục</h1>
-          <p className={Style.pageSubtitle}>Tổng số danh mục: {categories.length}</p>
-        </div>
-        <button className={Style.addBtn} onClick={handleAddCategory}>
-          <FaPlus /> Thêm danh mục
-        </button>
-      </div>
+  const handleSubmitForm = async (e: React.FormEvent) => {
+    e.preventDefault()
 
-      {/* Categories Grid */}
-      <div className={Style.categoriesGrid}>
-        {categories.map((category) => {
-          const IconComponent = category.icon
-          return (
-            <div key={category.id} className={Style.categoryCard}>
-              <div className={Style.categoryIcon} style={{ backgroundColor: category.color }}>
-                <IconComponent />
+    try {
+      if (editingCategory) {
+        // Update
+        await apiFetch(`/api/loaimon/${editingCategory.maLoaiMon}`, {
+          method: 'PUT',
+          body: JSON.stringify(formData)
+        })
+        alert('Cập nhật danh mục thành công!')
+      } else {
+        // Create
+        await apiFetch('/api/loaimon', {
+          method: 'POST',
+          body: JSON.stringify(formData)
+        })
+        alert('Thêm danh mục mới thành công!')
+      }
+
+      setShowModal(false)
+      await loadCategories()
+    } catch (err) {
+      alert('Lỗi: ' + (err instanceof ApiError ? err.message : 'Unknown error'))
+    }
+  }
+
+  const handleCloseModal = () => {
+    setShowModal(false)
+    setEditingCategory(null)
+  }
+
+  const filteredCategories = categories.filter((cat) =>
+    cat.tenLoaiMon.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cat.maLoaiMon.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className={styles.container}>
+          <div style={{ padding: '2rem', textAlign: 'center' }}>Đang tải dữ liệu...</div>
+        </div>
+      </AdminLayout>
+    )
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className={styles.container}>
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'red' }}>{error}</div>
+        </div>
+      </AdminLayout>
+    )
+  }
+
+  return (
+    <AdminLayout>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <div className={styles.headerMain}>
+            <h1>
+              <FaList /> Quản lý Danh mục
+            </h1>
+            <p>Quản lý các loại món ăn, đồ uống</p>
+          </div>
+          <button className={styles.addButton} onClick={handleAddCategory}>
+            <FaPlus /> Thêm danh mục mới
+          </button>
+        </div>
+
+        <div className={styles.toolbar}>
+          <div className={styles.searchBox}>
+            <FaSearch />
+            <input
+              type="text"
+              placeholder="Tìm kiếm danh mục..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className={styles.stats}>
+            <span>Tổng số: {filteredCategories.length} danh mục</span>
+          </div>
+        </div>
+
+        <div className={styles.gridContainer}>
+          {filteredCategories.map((category) => (
+            <div key={category.maLoaiMon} className={styles.categoryCard}>
+              <div className={styles.categoryHeader}>
+                <h3>{category.tenLoaiMon}</h3>
+                <span className={styles.categoryCode}>{category.maLoaiMon}</span>
               </div>
-              <div className={Style.categoryInfo}>
-                <h3 className={Style.categoryName}>{category.name}</h3>
-                <p className={Style.categoryCount}>{category.itemCount} món</p>
-                <span className={Style.categoryId}>ID: {category.id}</span>
-              </div>
-              <div className={Style.categoryActions}>
-                <button 
-                  className={Style.editBtn}
+              <div className={styles.categoryActions}>
+                <button
+                  className={styles.editBtn}
                   onClick={() => handleEditCategory(category)}
                   title="Chỉnh sửa"
                 >
-                  <FaEdit />
+                  <FaEdit /> Sửa
                 </button>
-                <button 
-                  className={Style.deleteBtn}
+                <button
+                  className={styles.deleteBtn}
                   onClick={() => handleDeleteCategory(category)}
                   title="Xóa"
                 >
-                  <FaTrash />
+                  <FaTrash /> Xóa
                 </button>
               </div>
             </div>
-          )
-        })}
+          ))}
+
+          {filteredCategories.length === 0 && (
+            <div className={styles.emptyState}>
+              <FaList />
+              <h3>Không tìm thấy danh mục</h3>
+              <p>Không có danh mục phù hợp với từ khóa tìm kiếm.</p>
+            </div>
+          )}
+        </div>
       </div>
-      </div>
-    </div>
+
+      {/* Modal for Add/Edit Category */}
+      {showModal && (
+        <div className={styles.modalOverlay} onClick={handleCloseModal}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>{editingCategory ? 'Chỉnh sửa danh mục' : 'Thêm danh mục mới'}</h2>
+              <button className={styles.closeBtn} onClick={handleCloseModal}>
+                <FaTimes />
+              </button>
+            </div>
+            <form onSubmit={handleSubmitForm} className={styles.modalForm}>
+              <div className={styles.formGroup}>
+                <label>Mã danh mục *</label>
+                <input
+                  type="text"
+                  value={formData.maLoaiMon}
+                  onChange={(e) => setFormData({ ...formData, maLoaiMon: e.target.value })}
+                  disabled={!!editingCategory}
+                  required
+                  placeholder="VD: LM01"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Tên danh mục *</label>
+                <input
+                  type="text"
+                  value={formData.tenLoaiMon}
+                  onChange={(e) => setFormData({ ...formData, tenLoaiMon: e.target.value })}
+                  required
+                  placeholder="VD: Cà phê"
+                />
+              </div>
+              <div className={styles.modalActions}>
+                <button type="button" className={styles.cancelBtn} onClick={handleCloseModal}>
+                  Hủy
+                </button>
+                <button type="submit" className={styles.submitBtn}>
+                  {editingCategory ? 'Cập nhật' : 'Thêm mới'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </AdminLayout>
   )
 }
 
-export default Category
-
-        
+export default CategoryPage

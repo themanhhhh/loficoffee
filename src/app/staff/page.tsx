@@ -1,175 +1,247 @@
 'use client'
-import React, { useState } from 'react'
-import Image from 'next/image'
+
+import React, { useEffect, useMemo, useState } from 'react'
+import Image, { StaticImageData } from 'next/image'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import Style from '../style/staff.module.css'
-import { FaShoppingCart, FaUser, FaTimes, FaPlus, FaMinus, FaCheck } from 'react-icons/fa'
+import {
+  FaShoppingCart,
+  FaUser,
+  FaTimes,
+  FaPlus,
+  FaMinus,
+  FaCheck,
+  FaDoorOpen,
+  FaMoneyBillWave,
+  FaExchangeAlt,
+  FaIdBadge,
+  FaThLarge,
+  FaSignOutAlt
+} from 'react-icons/fa'
 import { MdLocalCafe, MdLocalBar, MdCake, MdFastfood } from 'react-icons/md'
 import { GiTeapot } from 'react-icons/gi'
 import { logo, coffeeBlack } from '../image/index'
+import { apiFetch, ApiError } from '../../lib/api'
+import { ProtectedRoute } from '../../components/ProtectedRoute'
+import { useAuth } from '../../contexts/AuthContext'
+
+type IconType = React.ComponentType<{ className?: string }>
+
+interface LoaiMonDto {
+  maLoaiMon: string
+  tenLoaiMon: string
+}
+
+interface MonDto {
+  maMon: string
+  tenMon: string
+  donGia: number
+  donViTinh: string
+  moTa?: string | null
+  hinhAnh?: string | null
+  loaiMon?: {
+    maLoaiMon: string
+    tenLoaiMon: string
+  } | null
+  nhomThucDon?: {
+    maNhomThucDon: string
+    tenNhomThucDon: string
+  } | null
+}
 
 interface Product {
-  id: number
+  id: string
   name: string
   description: string
   price: number
-  image: string
-  category: string
+  image: StaticImageData | string
+  categoryId: string
+  categoryName: string
+}
+
+interface Category {
+  id: string
+  name: string
+  icon: IconType
 }
 
 interface CartItem extends Product {
   quantity: number
 }
 
+const CATEGORY_ICON_CYCLE: IconType[] = [MdLocalCafe, GiTeapot, MdLocalBar, MdCake, MdFastfood]
+
+const resolveProductImage = (source?: string | null): StaticImageData | string => {
+  if (!source) {
+    return coffeeBlack
+  }
+  if (/^https?:\/\//i.test(source)) {
+    return source
+  }
+  if (source.startsWith('/')) {
+    return source
+  }
+  return `/${source}`
+}
+
+const formatPrice = (price: number) =>
+  new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 0 }).format(price) + ' đ'
+
+const quickActions = [
+  {
+    href: '/staff/open-shift',
+    icon: FaDoorOpen,
+    title: 'Mở phiên làm việc',
+    description: 'Thiết lập ca mới và phân công nhân sự'
+  },
+  {
+    href: '/staff/open-shift',
+    icon: FaMoneyBillWave,
+    title: 'Nhập tiền đầu phiên',
+    description: 'Ghi nhận tiền mặt tại quầy trước khi bán'
+  },
+  {
+    href: '/staff/cashflow',
+    icon: FaExchangeAlt,
+    title: 'Thu chi trong ngày',
+    description: 'Theo dõi phiếu thu, chi và tổng kết ca'
+  },
+  {
+    href: '/staff/checkin-checkout',
+    icon: FaIdBadge,
+    title: 'Checkin / Checkout',
+    description: 'Điểm danh thời gian vào ca và kết ca'
+  }
+]
+
 const Staff = () => {
-  const [activeCategory, setActiveCategory] = useState('coffee')
+  const [activeCategory, setActiveCategory] = useState<string>('all')
   const [cart, setCart] = useState<CartItem[]>([])
   const [customerName, setCustomerName] = useState('')
   const [tableNumber, setTableNumber] = useState('')
+  const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<Category[]>([
+    { id: 'all', name: 'Tất cả', icon: FaThLarge }
+  ])
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<string | null>(null)
+  
+  const { user, logout } = useAuth()
+  const router = useRouter()
 
-  // Dữ liệu sản phẩm mẫu
-  const products: Product[] = [
-    // Cà phê
-    {
-      id: 1,
-      name: 'Cà phê đen',
-      description: 'Cà phê đen truyền thống, đậm đà',
-      price: 25000,
-      image: '/coffee-black.jpg',
-      category: 'coffee'
-    },
-    {
-      id: 2,
-      name: 'Cà phê sữa',
-      description: 'Cà phê sữa đá thơm ngon',
-      price: 30000,
-      image: '/coffee-milk.jpg',
-      category: 'coffee'
-    },
-    {
-      id: 3,
-      name: 'Cappuccino',
-      description: 'Cappuccino với lớp bọt sữa mịn',
-      price: 45000,
-      image: '/cappuccino.jpg',
-      category: 'coffee'
-    },
-    {
-      id: 4,
-      name: 'Latte',
-      description: 'Latte với nghệ thuật latte art',
-      price: 50000,
-      image: '/latte.jpg',
-      category: 'coffee'
-    },
-    // Trà
-    {
-      id: 5,
-      name: 'Trà đào cam sả',
-      description: 'Trà thảo mộc với đào cam sả thơm mát',
-      price: 35000,
-      image: '/tea-peach.jpg',
-      category: 'tea'
-    },
-    {
-      id: 6,
-      name: 'Trà sữa trân châu',
-      description: 'Trà sữa truyền thống với trân châu đen',
-      price: 40000,
-      image: '/milk-tea.jpg',
-      category: 'tea'
-    },
-    // Sinh tố
-    {
-      id: 7,
-      name: 'Sinh tố bơ',
-      description: 'Sinh tố bơ béo ngậy, bổ dưỡng',
-      price: 45000,
-      image: '/smoothie-avocado.jpg',
-      category: 'smoothie'
-    },
-    {
-      id: 8,
-      name: 'Sinh tố dâu',
-      description: 'Sinh tố dâu tươi ngọt mát',
-      price: 42000,
-      image: '/smoothie-strawberry.jpg',
-      category: 'smoothie'
-    },
-    // Bánh ngọt
-    {
-      id: 9,
-      name: 'Bánh croissant',
-      description: 'Bánh croissant bơ thơm giòn',
-      price: 35000,
-      image: '/croissant.jpg',
-      category: 'cake'
-    },
-    {
-      id: 10,
-      name: 'Bánh muffin',
-      description: 'Bánh muffin chocolate chip',
-      price: 30000,
-      image: '/muffin.jpg',
-      category: 'cake'
-    },
-    // Đồ ăn nhẹ
-    {
-      id: 11,
-      name: 'Sandwich gà',
-      description: 'Sandwich gà nướng với rau xanh',
-      price: 55000,
-      image: '/sandwich.jpg',
-      category: 'snack'
-    },
-    {
-      id: 12,
-      name: 'Salad trộn',
-      description: 'Salad rau củ tươi ngon, healthy',
-      price: 48000,
-      image: '/salad.jpg',
-      category: 'snack'
+  const handleLogout = () => {
+    logout()
+    router.push('/')
+  }
+
+  useEffect(() => {
+    let ignore = false
+
+    const loadData = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        const [monData, categoryData] = await Promise.all([
+          apiFetch<MonDto[]>('/api/mon'),
+          apiFetch<LoaiMonDto[]>('/api/loaimon')
+        ])
+
+        if (ignore) return
+
+        const baseCategories: Category[] = [
+          { id: 'all', name: 'Tất cả', icon: FaThLarge },
+          ...categoryData.map((item, index) => ({
+            id: item.maLoaiMon,
+            name: item.tenLoaiMon,
+            icon: CATEGORY_ICON_CYCLE[index % CATEGORY_ICON_CYCLE.length]
+          }))
+        ]
+
+        const mappedProducts: Product[] = monData.map((item) => ({
+          id: item.maMon,
+          name: item.tenMon,
+          description:
+            item.moTa ??
+            item.nhomThucDon?.tenNhomThucDon ??
+            item.loaiMon?.tenLoaiMon ??
+            'Đang cập nhật',
+          price: item.donGia ?? 0,
+          image: resolveProductImage(item.hinhAnh),
+          categoryId: item.loaiMon?.maLoaiMon ?? 'other',
+          categoryName: item.loaiMon?.tenLoaiMon ?? 'Khác'
+        }))
+
+        const hasOtherCategory = mappedProducts.some(
+          (product) => product.categoryId === 'other'
+        )
+
+        const mappedCategories = hasOtherCategory
+          ? [...baseCategories, { id: 'other', name: 'Khác', icon: MdFastfood }]
+          : baseCategories
+
+        setCategories(mappedCategories)
+        setProducts(mappedProducts)
+
+        if (mappedProducts.length === 0) {
+          setActiveCategory('all')
+        } else {
+          const firstCategoryFromData = mappedProducts[0].categoryId
+          const hasCategory = mappedCategories.some((cat) => cat.id === firstCategoryFromData)
+          setActiveCategory(hasCategory ? firstCategoryFromData : 'all')
+        }
+      } catch (err) {
+        if (ignore) return
+        setError(
+          err instanceof ApiError
+            ? err.message
+            : 'Không thể tải dữ liệu món. Vui lòng thử lại.'
+        )
+        setProducts([])
+      } finally {
+        if (!ignore) {
+          setLoading(false)
+        }
+      }
     }
-  ]
 
-  const categories = [
-    { id: 'coffee', name: 'Cà phê', icon: MdLocalCafe },
-    { id: 'tea', name: 'Trà', icon: GiTeapot },
-    { id: 'smoothie', name: 'Sinh tố', icon: MdLocalBar },
-    { id: 'cake', name: 'Bánh ngọt', icon: MdCake },
-    { id: 'snack', name: 'Đồ ăn nhẹ', icon: MdFastfood }
-  ]
+    loadData()
+    return () => {
+      ignore = true
+    }
+  }, [])
 
-  const filteredProducts = products.filter(product => product.category === activeCategory)
+  const visibleProducts = useMemo(() => {
+    if (activeCategory === 'all') {
+      return products
+    }
+    return products.filter((product) => product.categoryId === activeCategory)
+  }, [activeCategory, products])
 
   const addToCart = (product: Product) => {
-    setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.id === product.id)
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item.id === product.id)
       if (existingItem) {
-        return prevCart.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+        return prevCart.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
         )
-      } else {
-        return [...prevCart, { ...product, quantity: 1 }]
       }
+      return [...prevCart, { ...product, quantity: 1 }]
     })
   }
 
-  const removeFromCart = (productId: number) => {
-    setCart(prevCart => prevCart.filter(item => item.id !== productId))
+  const removeFromCart = (productId: string) => {
+    setCart((prevCart) => prevCart.filter((item) => item.id !== productId))
   }
 
-  const updateQuantity = (productId: number, newQuantity: number) => {
+  const updateQuantity = (productId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
       removeFromCart(productId)
       return
     }
-    setCart(prevCart =>
-      prevCart.map(item =>
-        item.id === productId
-          ? { ...item, quantity: newQuantity }
-          : item
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.id === productId ? { ...item, quantity: newQuantity } : item
       )
     )
   }
@@ -180,97 +252,132 @@ const Staff = () => {
     setTableNumber('')
   }
 
-  const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0)
-  }
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN').format(price) + ' đ'
-  }
+  const getTotalPrice = () =>
+    cart.reduce((total, item) => total + item.price * item.quantity, 0)
 
   return (
-    <div className={Style.staffContainer}>
-      {/* Header */}
-      <header className={Style.header}>
-        <div className={Style.headerLeft}>
-          <div className={Style.logo}>
-            <div className={Style.logoIconContainer}>
-              <Image 
-                src={logo}
-                alt="Cafe POS Logo" 
-                width={40} 
-                height={40}
-                className={Style.logoImage}
-              />
-            </div>
-            <div>
-              <h1>LOFI Coffee</h1>
-              <p>Hệ thống bán hàng</p>
+    <ProtectedRoute>
+      <div className={Style.staffContainer}>
+        <header className={Style.header}>
+          <div className={Style.headerLeft}>
+            <div className={Style.logo}>
+              <div className={Style.logoIconContainer}>
+                <Image
+                  src={logo}
+                  alt="Cafe POS Logo"
+                  width={40}
+                  height={40}
+                  className={Style.logoImage}
+                />
+              </div>
+              <div>
+                <h1>LOFI Coffee</h1>
+                <p>Hệ thống bán hàng</p>
+              </div>
             </div>
           </div>
-        </div>
-        <div className={Style.headerRight}>
-          <span>Ca làm việc</span>
-          <span className={Style.workTime}>08:00 - 20:00</span>
-          <FaUser className={Style.userIcon} />
-        </div>
-      </header>
+          <div className={Style.headerRight}>
+            <div className={Style.workTime}>Ca hiện tại: 07:00 - 12:00</div>
+            <div className={Style.userIcon}>
+              <FaUser />
+            </div>
+            <div>
+              <strong>{user?.tenNV || 'Người dùng'}</strong>
+              <p>Chức vụ: {user?.chucVu || 'Nhân viên'}</p>
+            </div>
+            <button 
+              className={Style.logoutBtn}
+              onClick={handleLogout}
+              title="Đăng xuất"
+            >
+              <FaSignOutAlt />
+            </button>
+          </div>
+        </header>
+
+      <div className={Style.quickActions}>
+        {quickActions.map((action) => {
+          const Icon = action.icon
+          return (
+            <Link key={action.title} href={action.href} className={Style.quickActionCard}>
+              <div className={Style.quickActionIcon}>
+                <Icon />
+              </div>
+              <div className={Style.quickActionInfo}>
+                <h3 className={Style.quickActionTitle}>{action.title}</h3>
+                <p className={Style.quickActionDescription}>{action.description}</p>
+              </div>
+            </Link>
+          )
+        })}
+      </div>
 
       <div className={Style.mainContent}>
-        {/* Left Panel - Menu */}
         <div className={Style.leftPanel}>
-          {/* Category Tabs */}
           <div className={Style.categoryTabs}>
-            {categories.map(category => {
-              const IconComponent = category.icon
+            {categories.map((category) => {
+              const Icon = category.icon
+              const isActive = activeCategory === category.id
               return (
                 <button
                   key={category.id}
-                  className={`${Style.categoryTab} ${activeCategory === category.id ? Style.active : ''}`}
+                  type="button"
+                  className={`${Style.categoryTab} ${isActive ? Style.active : ''}`}
                   onClick={() => setActiveCategory(category.id)}
                 >
-                  <IconComponent className={Style.categoryIcon} />
-                  {category.name}
+                  <Icon className={Style.categoryIcon} />
+                  <span>{category.name}</span>
                 </button>
               )
             })}
           </div>
 
-          {/* Product Grid */}
           <div className={Style.productGrid}>
-            {filteredProducts.map(product => (
-              <div key={product.id} className={Style.productCard}>
-                <div className={Style.productImage}>
-                  <Image 
-                    src={coffeeBlack}
-                    alt={product.name}
-                    width={200}
-                    height={150}
-                    className={Style.productImg}
-                  />
-                  <div className={Style.productPrice}>{formatPrice(product.price)}</div>
-                </div>
-                <div className={Style.productInfo}>
-                  <h3>{product.name}</h3>
-                  <p>{product.description}</p>
-                  <button 
-                    className={Style.addToCartBtn}
-                    onClick={() => addToCart(product)}
-                  >
-                    <FaPlus /> Thêm vào đơn
-                  </button>
-                </div>
+            {loading ? (
+              <div className={`${Style.productState} ${Style.productStateLoading}`}>
+                Đang tải dữ liệu món...
               </div>
-            ))}
+            ) : error ? (
+              <div className={`${Style.productState} ${Style.productStateError}`}>
+                {error}
+              </div>
+            ) : visibleProducts.length === 0 ? (
+              <div className={Style.productState}>
+                Không có món trong danh mục này.
+              </div>
+            ) : (
+              visibleProducts.map((product) => (
+                <div key={product.id} className={Style.productCard}>
+                  <div className={Style.productImage}>
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      width={280}
+                      height={200}
+                      className={Style.productImg}
+                    />
+                    <div className={Style.productPrice}>{formatPrice(product.price)}</div>
+                  </div>
+                  <div className={Style.productInfo}>
+                    <h3>{product.name}</h3>
+                    <p>{product.description}</p>
+                    <button
+                      className={Style.addToCartBtn}
+                      onClick={() => addToCart(product)}
+                    >
+                      <FaPlus /> Thêm vào đơn
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
-        {/* Right Panel - Order */}
         <div className={Style.rightPanel}>
           <div className={Style.orderSection}>
             <h2>Đơn hàng hiện tại</h2>
-            
-            {/* Customer Info */}
+
             <div className={Style.customerInfo}>
               <div className={Style.inputGroup}>
                 <label>Tên khách hàng</label>
@@ -292,7 +399,6 @@ const Staff = () => {
               </div>
             </div>
 
-            {/* Cart Items */}
             <div className={Style.cartItems}>
               {cart.length === 0 ? (
                 <div className={Style.emptyCart}>
@@ -300,20 +406,20 @@ const Staff = () => {
                   <p>Chưa có món nào trong đơn hàng</p>
                 </div>
               ) : (
-                cart.map(item => (
+                cart.map((item) => (
                   <div key={item.id} className={Style.cartItem}>
                     <div className={Style.cartItemInfo}>
                       <h4>{item.name}</h4>
                       <p>{formatPrice(item.price)}</p>
                       <div className={Style.quantityControls}>
-                        <button 
+                        <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
                           className={Style.quantityBtn}
                         >
                           <FaMinus />
                         </button>
                         <span className={Style.quantity}>{item.quantity}</span>
-                        <button 
+                        <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           className={Style.quantityBtn}
                         >
@@ -325,7 +431,7 @@ const Staff = () => {
                       <div className={Style.cartItemTotal}>
                         {formatPrice(item.price * item.quantity)}
                       </div>
-                      <button 
+                      <button
                         onClick={() => removeFromCart(item.id)}
                         className={Style.removeBtn}
                       >
@@ -337,7 +443,6 @@ const Staff = () => {
               )}
             </div>
 
-            {/* Total */}
             <div className={Style.orderTotal}>
               <div className={Style.totalRow}>
                 <span>Tổng cộng:</span>
@@ -345,21 +450,23 @@ const Staff = () => {
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className={Style.actionButtons}>
               {cart.length > 0 && (
-                <button 
-                  className={Style.clearBtn}
-                  onClick={clearCart}
-                >
+                <button className={Style.clearBtn} onClick={clearCart}>
                   Xóa đơn
                 </button>
               )}
-              <button 
+              <button
                 className={Style.paymentBtn}
                 disabled={cart.length === 0}
                 onClick={() => {
-                  alert(`Thanh toán thành công!\nTổng tiền: ${formatPrice(getTotalPrice())}\nKhách hàng: ${customerName || 'Khách vãng lai'}\nBàn: ${tableNumber || 'Mang về'}`)
+                  alert(
+                    `Thanh toán thành công!\nTổng tiền: ${formatPrice(
+                      getTotalPrice()
+                    )}\nKhách hàng: ${customerName || 'Khách vãng lai'}\nBàn: ${
+                      tableNumber || 'Mang về'
+                    }`
+                  )
                   clearCart()
                 }}
               >
@@ -369,7 +476,8 @@ const Staff = () => {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </ProtectedRoute>
   )
 }
 
